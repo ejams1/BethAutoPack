@@ -1,5 +1,6 @@
 import configparser
 import tkinter as tk
+from tkinter import messagebox
 import os
 import sys
 import shutil
@@ -8,11 +9,19 @@ from typing import Optional, List
 
 # ------------------- File Management & Config -------------------- #
 
+
+def error_and_exit(content: str) -> None:
+    messagebox.showerror("Error", content)
+    print(f"Error: {content}, exiting...")
+    sys.exit(1)
+
+
 def select_ini_file() -> Optional[str]:
     root = tk.Tk()
     root.withdraw()
-    
-    initial_path = os.path.join(os.path.expanduser("~"), "Documents", "My Games", "Starfield")
+
+    initial_path = os.path.join(os.path.expanduser(
+        "~"), "Documents", "My Games", "Starfield")
     if not os.path.exists(initial_path):
         initial_path = None
 
@@ -23,9 +32,9 @@ def select_ini_file() -> Optional[str]:
     )
 
     if 'StarfieldCustom.ini' not in file_path:
-        print(f"Error: Selected file path '{file_path}' does not include StarfieldCustom.ini, exiting...")
-        sys.exit(1)
-    
+        error_and_exit(f"Error: Selected file path '{
+            file_path}' does not include StarfieldCustom.ini")
+
     return file_path if file_path else None
 
 
@@ -40,13 +49,13 @@ def select_bsarch_exe() -> Optional[str]:
 
     # Rudimentary check to ensure the selected executable is what we want
     if 'BSArch64.exe' not in file_path:
-        print(f"Error: The selected file path '{file_path}' does not include BSArch64.exe, exiting...")
-        sys.exit(1)
+        error_and_exit(f"Error: The selected file path '{
+            file_path}' does not include BSArch64.exe")
 
     # Ensure it has executable permissions
     if not os.access(file_path, os.X_OK):
-        print(f"Error: The selected file '{file_path}' does not have executable permissions, exiting...")
-        sys.exit(1)
+        error_and_exit(f"Error: The selected file '{
+            file_path}' does not have executable permissions")
 
     return file_path if file_path else None
 
@@ -68,8 +77,7 @@ def backup_ini_file(custom_ini_path: str):
         shutil.copy(custom_ini_path, f"{custom_ini_path}.bak")
         print(f"{custom_ini_path} has been backed up to {custom_ini_path}.bak")
     except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+        error_and_exit(f"{e}")
 
 
 def remove_config_option(config: configparser.ConfigParser, sect: str, opt: str) -> configparser.ConfigParser:
@@ -129,22 +137,19 @@ def enable_loose_files(custom_ini_path: str) -> None:
 def get_paths() -> List[str]:
     custom_ini_path = select_ini_file()
     if not custom_ini_path:
-        print("No ini file selected. Exiting...")
-        sys.exit(1)
+        error_and_exit("No ini file selected")
 
     print(f"StarfieldCustom.ini selected at '{custom_ini_path}'")
 
     bsarch_exe_path = select_bsarch_exe()
     if not bsarch_exe_path:
-        print("No BSArch64.exe file selected. Exiting...")
-        sys.exit(1)
+        error_and_exit("No BSArch64.exe file selected")
 
     print(f"BSArch64.exe selected at '{bsarch_exe_path}'")
 
     loose_folder = select_loose_folder()
     if not loose_folder:
-        print("No loose folder selected. Exiting...")
-        sys.exit(1)
+        error_and_exit("No loose folder selected")
 
     print(f"Loose folder selected at '{loose_folder}'")
 
